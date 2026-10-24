@@ -295,7 +295,7 @@
   #    0 - unset (defaults from platform dsc)
   #    1 - set from PlatformConfig
   #    2 - set by GOP Driver.
-  gUefiOvmfPkgTokenSpaceGuid.PcdVideoResolutionSource|2
+  gUefiOvmfPkgTokenSpaceGuid.PcdVideoResolutionSource|0
 
 !include NetworkPkg/NetworkDynamicPcds.dsc.inc
 

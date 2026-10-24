@@ -130,6 +130,13 @@ VirtioGpuInit (
     //
     // [...] population of virtqueues [...]
     //
+    // MMIO requires QueueNum to be programmed explicitly. PCI transports may
+    // default to QueueNumMax, but modern MMIO starts at zero.
+    Status = VgpuDev->VirtIo->SetQueueNum (VgpuDev->VirtIo, QueueSize);
+    if (EFI_ERROR (Status)) {
+      goto RollbackQueues;
+    }
+
     Status = VirtioRingInit (VgpuDev->VirtIo, QueueSize, &VgpuDev->Ring[QueueIdx]);
     if (EFI_ERROR (Status)) {
       goto RollbackQueues;
