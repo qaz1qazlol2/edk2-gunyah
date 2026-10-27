@@ -16,6 +16,10 @@ jobs:
     name: Build (${{ matrix.build_type }}, ${{ matrix.pci_mode }})
     runs-on: ubuntu-24.04-arm
     strategy:
+      # Do not cancel the other matrix legs when one of them fails: in a fork
+      # the RELEASE/ECAM leg has no PREBUILTS_TOKEN, and fail-fast used to
+      # cancel the DEBUG legs before their artifacts were uploaded.
+      fail-fast: false
       matrix:
         build_type: [DEBUG, RELEASE]
         pci_mode: [CAM, ECAM]
@@ -52,7 +56,7 @@ jobs:
           ls -la
 
       - name: Prepare DroidVM-Prebuilt-Root
-        if: matrix.build_type == 'RELEASE' && matrix.pci_mode == 'ECAM'
+        if: github.repository == 'Droid-VM/edk2-gunyah' && matrix.build_type == 'RELEASE' && matrix.pci_mode == 'ECAM'
         env:
           TARGET_REPO: Droid-VM/DroidVM-Prebuilt-Root
           GH_TOKEN: ${{ secrets.PREBUILTS_TOKEN }}
@@ -86,7 +90,7 @@ jobs:
           fi
 
       - name: Update DroidVM-Prebuilt-Root edk2 files
-        if: matrix.build_type == 'RELEASE' && matrix.pci_mode == 'ECAM'
+        if: github.repository == 'Droid-VM/edk2-gunyah' && matrix.build_type == 'RELEASE' && matrix.pci_mode == 'ECAM'
         run: |
           set -euo pipefail
 
@@ -94,7 +98,7 @@ jobs:
           install -Dm644 edk2-gunyah.vars.fd prebuilt-root/manual-build/arm64-v8a/usr/share/droidvm/edk2-gunyah.vars.fd
 
       - name: Commit and push DroidVM-Prebuilt-Root edk2 files
-        if: matrix.build_type == 'RELEASE' && matrix.pci_mode == 'ECAM'
+        if: github.repository == 'Droid-VM/edk2-gunyah' && matrix.build_type == 'RELEASE' && matrix.pci_mode == 'ECAM'
         env:
           SOURCE_SHA: ${{ github.sha }}
         run: |
