@@ -1,0 +1,25 @@
+diff --git a/DynamicTablesPkg/Library/FdtHwInfoParserLib/Arm/GenericTimer/ArmGenericTimerParser.c b/DynamicTablesPkg/Library/FdtHwInfoParserLib/Arm/GenericTimer/ArmGenericTimerParser.c
+index 5db3a3a..895e449 100644
+--- a/DynamicTablesPkg/Library/FdtHwInfoParserLib/Arm/GenericTimer/ArmGenericTimerParser.c
++++ b/DynamicTablesPkg/Library/FdtHwInfoParserLib/Arm/GenericTimer/ArmGenericTimerParser.c
+@@ -131,6 +131,20 @@ TimerNodeParser (
+     GenericTimerInfo->NonSecurePL2TimerFlags |= BIT2;
+   }
+ 
++  //
++  // DroidVM: MediaTek GenieZone only routes the EL1 virtual timer PPI; the
++  // non-secure EL1 physical timer PPI (normally 30) is never raised. EDK2's
++  // TimerDxe and the Windows ARM64 HAL both program CNTP and then wait for
++  // that PPI, so they stall. Stop advertising the physical timers in the GTDT
++  // so guests fall back to the virtual timer (CNTV) instead.
++  //
++  GenericTimerInfo->SecurePL1TimerGSIV     = 0;
++  GenericTimerInfo->SecurePL1TimerFlags    = 0;
++  GenericTimerInfo->NonSecurePL1TimerGSIV  = 0;
++  GenericTimerInfo->NonSecurePL1TimerFlags = 0;
++  GenericTimerInfo->NonSecurePL2TimerGSIV  = 0;
++  GenericTimerInfo->NonSecurePL2TimerFlags = 0;
++
+   // Setup default values
+   // The CntControlBase & CntReadBase Physical Address are optional if
+   // the system implements EL3 (Security Extensions). So, initialise
