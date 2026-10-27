@@ -926,9 +926,21 @@ PlatformBootManagerBeforeConsole (
     );
 
   //
-  // Set the front page timeout from the QEMU configuration.
+  // Skip the front page timeout.
   //
-  FrontPageTimeout = GetFrontPageTimeoutFromQemu ();
+  // This firmware only runs under crosvm (Gunyah / GenieZone), which has no QEMU
+  // fw_cfg to read a timeout from. More importantly, the timeout wait in BdsDxe's
+  // BdsWait() takes the BdsWaitForSingleEvent (HotkeyTriggered, 1s) path whenever
+  // a LOAD_OPTION_CATEGORY_APP option exists ("EFI Firmware Setup", "EFI Internal
+  // Shell"), and that path waits on a timer event. TimerDxe drives the non-secure
+  // physical timer (CNTP) and expects PPI 30. MediaTek's GenieZone does not deliver
+  // that PPI to the guest, so the event never fires and the guest hangs forever on
+  // the "Start boot option" splash. Linux guests use the virtual timer (CNTV,
+  // PPI 27) and are not affected.
+  //
+  // Booting immediately keeps EDK2 off that code path entirely.
+  //
+  FrontPageTimeout = 0;
   PcdStatus        = PcdSet16S (PcdPlatformBootTimeOut, FrontPageTimeout);
   ASSERT_RETURN_ERROR (PcdStatus);
   //
